@@ -1,0 +1,13 @@
+dist/
+coverage/
+node_modules/
+.npm/
+
+package-lock.json
+npm-shrinkwrap.json
+pnpm-lock.yaml
+yarn.lock
+bun.lock
+bun.lockb
+
+prisma/generated/

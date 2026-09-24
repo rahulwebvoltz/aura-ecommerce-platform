@@ -1,0 +1,221 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/plus-jakarta-sans';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ------------------------------------------------------------------------------------------------
+ * Semantic tokens. Components use these names only, so both themes stay in sync.
+ * ----------------------------------------------------------------------------------------------*/
+:root {
+  color-scheme: light;
+  --bg: oklch(98.6% 0.004 85);
+  --surface: oklch(100% 0 0);
+  --surface-2: oklch(96.2% 0.006 85);
+  --fg: oklch(18% 0.012 270);
+  --muted: oklch(50% 0.014 270);
+  --subtle: oklch(68% 0.012 270);
+  --border: oklch(91% 0.006 85);
+  --accent: oklch(55% 0.21 285);
+  --accent-soft: oklch(94% 0.04 285);
+  --accent-fg: oklch(99% 0 0);
+  --sale: oklch(62% 0.21 25);
+  --success: oklch(60% 0.15 155);
+  --warning: oklch(75% 0.16 75);
+  --ring: oklch(55% 0.21 285 / 0.45);
+  --shadow-color: 270 20% 20%;
+}
+
+.dark {
+  color-scheme: dark;
+  --bg: oklch(15% 0.008 270);
+  --surface: oklch(19% 0.01 270);
+  --surface-2: oklch(23% 0.012 270);
+  --fg: oklch(96% 0.004 85);
+  --muted: oklch(72% 0.012 270);
+  --subtle: oklch(55% 0.012 270);
+  --border: oklch(29% 0.012 270);
+  --accent: oklch(72% 0.17 285);
+  --accent-soft: oklch(30% 0.08 285);
+  --accent-fg: oklch(15% 0.02 285);
+  --sale: oklch(70% 0.19 25);
+  --success: oklch(72% 0.15 155);
+  --warning: oklch(80% 0.15 75);
+  --ring: oklch(72% 0.17 285 / 0.5);
+  --shadow-color: 270 40% 2%;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-fg: var(--accent-fg);
+  --color-sale: var(--sale);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-ring: var(--ring);
+}
+
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display:
+    'Plus Jakarta Sans Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --animate-marquee: marquee 38s linear infinite;
+  --animate-shimmer: shimmer 1.6s ease-in-out infinite;
+  --animate-aurora: aurora 18s ease-in-out infinite alternate;
+  --animate-float: float 7s ease-in-out infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  @keyframes shimmer {
+    from {
+      background-position: 150% 0;
+    }
+    to {
+      background-position: -50% 0;
+    }
+  }
+
+  @keyframes aurora {
+    0% {
+      transform: translate3d(-8%, -6%, 0) rotate(0deg) scale(1);
+    }
+    50% {
+      transform: translate3d(6%, 4%, 0) rotate(40deg) scale(1.15);
+    }
+    100% {
+      transform: translate3d(-4%, 8%, 0) rotate(-20deg) scale(1.05);
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+    50% {
+      transform: translate3d(0, -14px, 0);
+    }
+  }
+}
+
+@layer base {
+  html {
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-bg text-fg font-sans;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-fg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    appearance: none;
+    margin: 0;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-10;
+  }
+
+  .text-display {
+    @apply font-display font-semibold leading-[1.05] tracking-[-0.035em] not-italic;
+  }
+
+  .eyebrow {
+    @apply text-[11px] font-semibold tracking-[0.2em] text-muted uppercase;
+  }
+
+  .card-shadow {
+    box-shadow:
+      0 1px 2px hsl(var(--shadow-color) / 0.04),
+      0 8px 24px -12px hsl(var(--shadow-color) / 0.18);
+  }
+
+  .elevated {
+    box-shadow:
+      0 1px 2px hsl(var(--shadow-color) / 0.06),
+      0 24px 60px -20px hsl(var(--shadow-color) / 0.35);
+  }
+
+  .skeleton {
+    background: linear-gradient(
+      100deg,
+      var(--surface-2) 30%,
+      color-mix(in oklch, var(--surface-2), var(--fg) 6%) 50%,
+      var(--surface-2) 70%
+    );
+    background-size: 200% 100%;
+    @apply animate-shimmer rounded-xl;
+  }
+
+  .glass {
+    background: color-mix(in oklch, var(--bg) 72%, transparent);
+    backdrop-filter: saturate(1.6) blur(18px);
+    -webkit-backdrop-filter: saturate(1.6) blur(18px);
+  }
+
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.06;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .mask-fade-x {
+    mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}

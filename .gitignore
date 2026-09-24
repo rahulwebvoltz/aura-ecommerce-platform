@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+.vite/
+.npm/
+
+.env
+.env.*
+!.env.example
+
+*.tsbuildinfo
+
+*.log
+.DS_Store
+
+# Prisma client output, regenerated on install
+prisma/generated/

@@ -1,0 +1,60 @@
+{
+  "name": "ecommerce",
+  "version": "0.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25",
+    "npm": ">=11 <12"
+  },
+  "packageManager": "npm@11.17.0",
+  "workspaces": [
+    "packages/shared",
+    "packages/types",
+    "packages/validation",
+    "prisma",
+    "apps/api",
+    "apps/web"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "db:generate": "npm run db:generate -w @ecommerce/db",
+    "db:migrate": "npm run db:migrate -w @ecommerce/db",
+    "db:migrate:deploy": "npm run db:migrate:deploy -w @ecommerce/db",
+    "db:reset": "npm run db:reset -w @ecommerce/db",
+    "db:seed": "npm run db:seed -w @ecommerce/db",
+    "db:studio": "npm run db:studio -w @ecommerce/db",
+    "dev": "concurrently --kill-others-on-fail --names api,web --prefix-colors cyan,magenta \"npm run dev -w @ecommerce/api\" \"npm run dev -w @ecommerce/web\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint . --max-warnings=0 && npm run lint --workspaces",
+    "prepare": "husky",
+    "quality": "npm run format:check && npm run lint && npm run typecheck",
+    "security:audit": "npm audit --audit-level=high",
+    "test": "vitest run && npm run test --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
+    "test:policy": "vitest run"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "21.2.1",
+    "@commitlint/config-conventional": "21.2.0",
+    "@eslint/js": "9.39.5",
+    "concurrently": "10.0.5",
+    "eslint": "9.39.5",
+    "eslint-config-prettier": "10.1.8",
+    "globals": "17.7.0",
+    "husky": "9.1.7",
+    "lint-staged": "17.0.8",
+    "prettier": "3.9.5",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.64.0",
+    "vitest": "4.1.11"
+  },
+  "overrides": {
+    "deepmerge-ts": "8.0.2",
+    "mysql2": "3.24.4",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  }
+}

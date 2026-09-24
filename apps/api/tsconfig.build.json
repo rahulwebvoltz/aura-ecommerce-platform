@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "customConditions": []
+  },
+  "exclude": ["node_modules", "dist", "**/*.test.*", "src/test/**", "vitest.config.mts"]
+}
