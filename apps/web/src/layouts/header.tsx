@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router';
 
 import { Logo, ThemeToggle } from '@/components/brand';
+import { InstallAppButton } from '@/features/pwa/pwa-parts';
 import { Drawer } from '@/components/ui/overlay';
 import { CART_TARGET_ID } from '@/features/cart/fly-to-cart';
 import { useCart } from '@/hooks/use-cart';
@@ -264,6 +265,7 @@ function MobileNav({ categories }: { categories: CategoryDto[] }) {
             </AnimatePresence>
           </div>
         ))}
+        <InstallAppButton className="mx-3 mt-6" />
       </nav>
     </Drawer>
   );

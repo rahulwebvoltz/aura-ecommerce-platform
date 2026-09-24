@@ -7,13 +7,20 @@ import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router';
 import { Toaster } from 'sonner';
 
+import { registerServiceWorker } from '@/features/pwa/register-service-worker';
 import { restoreSession } from '@/hooks/use-auth';
 import { createQueryClient } from '@/lib/query';
-import { router } from '@/router';
+import { createRouter } from '@/router';
+import { listenForInstallPrompt } from '@/stores/pwa.store';
 import { useThemeStore } from '@/stores/theme.store';
 
 const queryClient = createQueryClient();
+const router = createRouter(queryClient);
 void restoreSession();
+listenForInstallPrompt();
+if (import.meta.env.PROD) {
+  registerServiceWorker();
+}
 
 function ThemedToaster() {
   const theme = useThemeStore((state) => state.theme);

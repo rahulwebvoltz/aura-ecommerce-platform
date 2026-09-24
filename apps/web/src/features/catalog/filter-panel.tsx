@@ -130,24 +130,36 @@ function PriceRange({
   const commit = () => {
     onCommit(low <= min ? undefined : low, high >= max ? undefined : high);
   };
+  const percent = (amount: number) => ((amount - min) / span) * 100;
+  // Each input covers only its side of the midpoint between the thumbs, so the two never overlap
+  // and each keeps a full-size touch target. The scale (pixels per rupee) is the same on both.
+  const mid = Math.min(
+    Math.max(min + Math.round((low + high) / 2 / step - min / step) * step, low),
+    high,
+  );
+  // Where a thumb's centre sits: browsers inset it by half its width (10px) at either end.
+  const thumbCentre = (amount: number, from: number, to: number, start: number, width: number) =>
+    `calc(${String(start)}% + 10px + (${String(width)}% - 20px) * ${String(to > from ? (amount - from) / (to - from) : 0)})`;
+  const lowCentre = thumbCentre(low, min, mid, 0, percent(mid));
+  const highCentre = thumbCentre(high, mid, max, percent(mid), 100 - percent(mid));
   const thumb =
-    'pointer-events-none absolute inset-0 h-5 w-full appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:size-5 [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-bg [&::-webkit-slider-thumb]:bg-fg [&::-webkit-slider-thumb]:shadow-md [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:size-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-bg [&::-moz-range-thumb]:bg-fg';
+    'absolute inset-y-0 h-6 appearance-none bg-transparent [&::-webkit-slider-thumb]:size-5 [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-bg [&::-webkit-slider-thumb]:bg-fg [&::-webkit-slider-thumb]:shadow-md [&::-moz-range-thumb]:size-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-bg [&::-moz-range-thumb]:bg-fg';
 
   return (
     <div className="space-y-4">
-      <div className="relative h-5">
+      <div className="relative h-6">
         <div className="absolute top-1/2 h-1 w-full -translate-y-1/2 rounded-full bg-border" />
         <motion.div
           className="absolute top-1/2 h-1 -translate-y-1/2 rounded-full bg-accent"
           style={{
-            left: `${String(((low - min) / span) * 100)}%`,
-            right: `${String(100 - ((high - min) / span) * 100)}%`,
+            left: lowCentre,
+            width: `calc(${highCentre} - ${lowCentre})`,
           }}
         />
         <input
           type="range"
           min={min}
-          max={max}
+          max={mid}
           step={step}
           value={low}
           aria-label="Minimum price"
@@ -157,10 +169,11 @@ function PriceRange({
           onPointerUp={commit}
           onKeyUp={commit}
           className={thumb}
+          style={{ left: 0, width: `${String(percent(mid))}%` }}
         />
         <input
           type="range"
-          min={min}
+          min={mid}
           max={max}
           step={step}
           value={high}
@@ -171,6 +184,7 @@ function PriceRange({
           onPointerUp={commit}
           onKeyUp={commit}
           className={thumb}
+          style={{ left: `${String(percent(mid))}%`, right: 0 }}
         />
       </div>
       <div className="flex items-center justify-between text-sm">

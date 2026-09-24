@@ -37,3 +37,13 @@ Object.defineProperty(window, 'IntersectionObserver', {
   writable: true,
   value: IntersectionObserverStub,
 });
+
+// jsdom has no pointer capture; sonner's swipe-to-dismiss calls it when a toast is pressed.
+Object.defineProperty(Element.prototype, 'setPointerCapture', {
+  writable: true,
+  value: () => undefined,
+});
+Object.defineProperty(Element.prototype, 'releasePointerCapture', {
+  writable: true,
+  value: () => undefined,
+});

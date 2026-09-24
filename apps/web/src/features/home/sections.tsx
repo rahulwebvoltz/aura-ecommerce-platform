@@ -57,7 +57,7 @@ export function BrandMarquee({ brands }: { brands: BrandDto[] }) {
                 key={`${String(copy)}-${brand.id}`}
                 to={`/products?brand=${brand.slug}`}
                 tabIndex={copy === 1 ? -1 : undefined}
-                className="text-display py-1.5 text-3xl whitespace-nowrap text-fg/35 transition-colors hover:text-fg"
+                className="text-display py-1.5 text-3xl whitespace-nowrap text-muted transition-colors hover:text-fg"
               >
                 {brand.name}
               </Link>

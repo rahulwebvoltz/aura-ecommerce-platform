@@ -5,6 +5,7 @@ import { type Location, Navigate, ScrollRestoration, useLocation, useOutlet } fr
 import { Skeleton } from '@/components/ui/display';
 import { CartDrawer } from '@/features/cart/cart-drawer';
 import { FlyToCart } from '@/features/cart/fly-to-cart';
+import { OfflineBanner } from '@/features/pwa/pwa-parts';
 import { CommandPalette } from '@/features/search/command-palette';
 import { useAuthStore } from '@/stores/auth.store';
 
@@ -75,6 +76,7 @@ export function RootLayout() {
       <CartDrawer />
       <CommandPalette />
       <FlyToCart />
+      <OfflineBanner />
       <ScrollRestoration getKey={scrollKey} />
     </>
   );

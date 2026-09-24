@@ -21,7 +21,7 @@ export function Skeleton({ className }: { className?: string }) {
 const badgeTones = {
   neutral: 'bg-surface-2 text-fg',
   accent: 'bg-accent-soft text-accent',
-  sale: 'bg-sale text-white',
+  sale: 'bg-sale text-white dark:text-bg',
   success: 'bg-success/15 text-success',
   warning: 'bg-warning/20 text-[color-mix(in_oklch,var(--warning),black_35%)] dark:text-warning',
   dark: 'bg-fg text-bg',
@@ -259,7 +259,8 @@ export function SplitText({
 }) {
   const words = text.split(' ');
   return (
-    <span className={className} aria-label={text}>
+    <span className={className}>
+      <span className="sr-only">{text}</span>
       {words.map((word, index) => (
         <span
           key={`${word}-${String(index)}`}

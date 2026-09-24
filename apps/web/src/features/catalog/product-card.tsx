@@ -16,10 +16,13 @@ import { useUiStore } from '@/stores/ui.store';
 export function ProductCard({
   product,
   index = 0,
+  priority = false,
   className,
 }: {
   product: ProductSummaryDto;
   index?: number;
+  /** Load the image right away at high priority. For the first cards on screen. */
+  priority?: boolean;
   className?: string;
 }) {
   const cart = useCart();
@@ -27,6 +30,13 @@ export function ProductCard({
   const launchFlight = useUiStore((state) => state.launchFlight);
   const imageRef = useRef<HTMLDivElement>(null);
   const [adding, setAdding] = useState(false);
+  // The second image only matters on hover, so it is not downloaded until the card is first
+  // hovered or focused. On touch screens it is never requested at all.
+  const [showHover, setShowHover] = useState(false);
+  const [hoverReady, setHoverReady] = useState(false);
+  const revealHover = () => {
+    setShowHover(true);
+  };
   const off = discountPercent(product.price, product.compareAtPrice);
   const soldOut = product.stock === 0;
   const lowStock = !soldOut && product.stock <= 5;
@@ -72,9 +82,11 @@ export function ProductCard({
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.6, delay: (index % 4) * 0.07, ease: [0.16, 1, 0.3, 1] }}
       className={cn('group relative flex flex-col', className)}
+      onPointerEnter={revealHover}
+      onFocus={revealHover}
     >
       <div className="relative">
-        <Link to={detailPath} className="block" aria-label={product.name}>
+        <Link to={detailPath} className="block">
           <div
             ref={imageRef}
             className="relative aspect-[4/5] overflow-hidden rounded-[26px] bg-surface-2"
@@ -82,23 +94,30 @@ export function ProductCard({
             {product.image !== null && (
               <motion.img
                 src={product.image.url}
-                alt={product.image.alt ?? product.name}
-                loading="lazy"
+                alt={product.name}
+                loading={priority ? 'eager' : 'lazy'}
+                fetchPriority={priority ? 'high' : 'auto'}
                 decoding="async"
                 className={cn(
                   'absolute inset-0 size-full object-contain p-6 mix-blend-multiply transition duration-700 ease-[var(--ease-out-expo)] group-hover:scale-[1.06] dark:mix-blend-normal',
-                  product.hoverImage !== null && 'group-hover:opacity-0',
+                  hoverReady && 'group-hover:opacity-0',
                   soldOut && 'opacity-60 grayscale',
                 )}
               />
             )}
-            {product.hoverImage !== null && (
+            {showHover && product.hoverImage !== null && (
               <img
                 src={product.hoverImage.url}
                 alt=""
                 aria-hidden
-                loading="lazy"
-                className="absolute inset-0 size-full scale-[1.06] object-contain p-6 opacity-0 mix-blend-multiply transition duration-700 ease-[var(--ease-out-expo)] group-hover:scale-100 group-hover:opacity-100 dark:mix-blend-normal"
+                decoding="async"
+                onLoad={() => {
+                  setHoverReady(true);
+                }}
+                className={cn(
+                  'absolute inset-0 size-full scale-[1.06] object-contain p-6 opacity-0 mix-blend-multiply transition duration-700 ease-[var(--ease-out-expo)] dark:mix-blend-normal',
+                  hoverReady && 'group-hover:scale-100 group-hover:opacity-100',
+                )}
               />
             )}
 

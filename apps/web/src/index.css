@@ -14,13 +14,13 @@
   --surface-2: oklch(96.2% 0.006 85);
   --fg: oklch(18% 0.012 270);
   --muted: oklch(50% 0.014 270);
-  --subtle: oklch(68% 0.012 270);
+  --subtle: oklch(54% 0.012 270);
   --border: oklch(91% 0.006 85);
   --accent: oklch(55% 0.21 285);
   --accent-soft: oklch(94% 0.04 285);
   --accent-fg: oklch(99% 0 0);
-  --sale: oklch(62% 0.21 25);
-  --success: oklch(60% 0.15 155);
+  --sale: oklch(55% 0.21 25);
+  --success: oklch(50% 0.15 155);
   --warning: oklch(75% 0.16 75);
   --ring: oklch(55% 0.21 285 / 0.45);
   --shadow-color: 270 20% 20%;
@@ -33,7 +33,7 @@
   --surface-2: oklch(23% 0.012 270);
   --fg: oklch(96% 0.004 85);
   --muted: oklch(72% 0.012 270);
-  --subtle: oklch(55% 0.012 270);
+  --subtle: oklch(64% 0.012 270);
   --border: oklch(29% 0.012 270);
   --accent: oklch(72% 0.17 285);
   --accent-soft: oklch(30% 0.08 285);
@@ -200,6 +200,27 @@
 
   .mask-fade-x {
     mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  }
+
+  /* Mirrors the announcement bar and header so the first paint matches what React renders. */
+  .app-shell-bar {
+    @apply h-[34px] bg-fg;
+  }
+
+  .app-shell-header {
+    @apply flex h-20 items-center gap-2 sm:gap-4;
+  }
+
+  .app-shell-menu {
+    @apply size-10 lg:hidden;
+  }
+
+  .app-shell-mark {
+    @apply grid size-9 place-items-center rounded-xl bg-gradient-to-br from-[oklch(68%_0.17_285)] to-[oklch(45%_0.22_285)] text-white;
+  }
+
+  .app-shell-name {
+    @apply font-display text-[28px] leading-none font-semibold tracking-[-0.035em] sm:-ml-2;
   }
 
   .no-scrollbar {

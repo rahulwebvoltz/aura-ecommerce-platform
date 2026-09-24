@@ -38,6 +38,13 @@ I wanted it to feel like a polished store rather than a demo, so there's quite a
 
 It has light and dark themes and works from small phones up to wide desktops. I checked seven screen sizes, from 360 px to 1920 px, for anything overflowing or getting cut off.
 
+**Installable app (PWA)**
+
+- You can install Aura from the browser, and it opens in its own window with its own icon. On Chrome and Edge there's an "Install the app" button in the footer and the mobile menu. On an iPhone, use Share → Add to Home Screen.
+- It works offline for anything you've already looked at. The app itself is cached, and so are catalogue responses and product images, so pages you've visited still load without a connection. A small notice tells you when you're offline.
+- Only public catalogue data is cached. Your cart, orders, wishlist and account details are never stored by the service worker, so nothing personal is left behind after you sign out.
+- When a new version is deployed, a toast offers to reload. It never reloads on its own, so an update can't interrupt a checkout.
+
 ## 📸 Screenshots
 
 These were all taken from the app running locally with the demo data loaded.
@@ -109,6 +116,7 @@ These were all taken from the app running locally with the demo data loaded.
 | npm workspaces                                | Running it as one repo                                                   |
 | ESLint, Prettier, Husky, commitlint, Gitleaks | Keeping the code clean and secrets out of Git                            |
 | Vitest, Supertest, Testing Library            | Tests                                                                    |
+| vite-plugin-pwa (Workbox)                     | Web app manifest, service worker, offline caching                        |
 | GitHub Actions                                | CI                                                                       |
 
 Headings use Plus Jakarta Sans and body text uses Inter. Both are self-hosted.
@@ -158,6 +166,8 @@ apps/
                       checkout, orders, payments, reviews…), plus middleware/, services/, config/
   web/                React storefront: pages/, features/, components/, layouts/, hooks/,
                       stores/, services/, lib/
+    public/           app icons, install screenshots, robots.txt
+    pwa.config.js     web app manifest and service worker settings
 packages/
   shared/             constants, money helpers, pricing        (@ecommerce/shared)
   types/              API response schemas and types           (@ecommerce/types)
@@ -266,23 +276,47 @@ One of the demo customer's orders is already delivered. It contains _Essence Mas
 
 No emails are actually sent in development. Verification and password-reset links are printed in the API terminal instead.
 
+### Trying the production build
+
+`npm run dev` is for working on the code. To see what visitors actually get, which is minified, code-split and has the service worker switched on, build it and serve the result:
+
+```bash
+# terminal 1: the API
+npm run dev -w @ecommerce/api
+
+# terminal 2: build everything, then serve the storefront build
+npm run build
+npm run preview -w @ecommerce/web -- --port 5173
+```
+
+Then open http://localhost:5173. Stop `npm run dev` first, because it uses the same port.
+
+A few things to know:
+
+- Build from the repo root. The storefront uses the built versions of the shared packages, and the root build makes those first.
+- The API only answers the origins listed in `CORS_ORIGINS`, which is why the preview runs on port 5173. If you want Vite's default port 4173 instead, add `http://localhost:4173` to `CORS_ORIGINS` in `apps/api/.env` and restart the API.
+- The storefront finds the API through `VITE_API_BASE_URL`, and that address is baked in when you build. If you change it, build again.
+- The service worker is active here. After a rebuild you'll see a "new version is ready" toast. Click Reload to switch to it.
+- To run the API from its build as well, use `npm run start -w @ecommerce/api` instead of the `dev` command, after `npm run build`.
+
 ## ⚙️ Commands
 
 Run these from the repo root.
 
-| Command                     | What it does                                                 |
-| --------------------------- | ------------------------------------------------------------ |
-| `npm run dev`               | Starts the API and the storefront together                   |
-| `npm run build`             | Builds everything, in the right order                        |
-| `npm run quality`           | Prettier check, ESLint and TypeScript across every workspace |
-| `npm test`                  | All tests, with coverage                                     |
-| `npm run format`            | Formats the code with Prettier                               |
-| `npm run db:migrate`        | Creates and applies a new migration while you're developing  |
-| `npm run db:migrate:deploy` | Applies the existing migrations                              |
-| `npm run db:seed`           | Wipes the data and loads the demo data                       |
-| `npm run db:reset`          | Drops the database, recreates it and loads the demo data     |
-| `npm run db:studio`         | Opens Prisma Studio so you can look at the data              |
-| `npm run security:audit`    | Fails if any dependency has a high-severity advisory         |
+| Command                                            | What it does                                                     |
+| -------------------------------------------------- | ---------------------------------------------------------------- |
+| `npm run dev`                                      | Starts the API and the storefront together                       |
+| `npm run build`                                    | Builds everything, in the right order                            |
+| `npm run preview -w @ecommerce/web -- --port 5173` | Serves the storefront's production build (after `npm run build`) |
+| `npm run quality`                                  | Prettier check, ESLint and TypeScript across every workspace     |
+| `npm test`                                         | All tests, with coverage                                         |
+| `npm run format`                                   | Formats the code with Prettier                                   |
+| `npm run db:migrate`                               | Creates and applies a new migration while you're developing      |
+| `npm run db:migrate:deploy`                        | Applies the existing migrations                                  |
+| `npm run db:seed`                                  | Wipes the data and loads the demo data                           |
+| `npm run db:reset`                                 | Drops the database, recreates it and loads the demo data         |
+| `npm run db:studio`                                | Opens Prisma Studio so you can look at the data                  |
+| `npm run security:audit`                           | Fails if any dependency has a high-severity advisory             |
 
 Be careful with `db:seed` and `db:reset`: both delete what's there. The seeder won't run with `NODE_ENV=production` unless you also set `SEED_ALLOW_PRODUCTION=true`.
 
@@ -326,13 +360,54 @@ You can repeat `brand` and `attr` to pick more than one. Prices you send are in 
 | `packages/validation` |    27 |       100% |     100% |      100% |  100% |
 | `prisma`              |     5 |       100% |     100% |      100% |  100% |
 | `apps/api`            |   107 |      97.4% |    89.9% |      100% | 97.3% |
-| `apps/web`            |   107 |      99.5% |    96.2% |      100% | 99.5% |
+| `apps/web`            |   116 |      99.5% |    96.4% |      100% | 99.5% |
 
 The standards require at least 90% statements, 85% branches, 100% functions and 90% lines, and the build fails below that.
 
 The API tests make real HTTP calls against a real database, the `_test` copy of whatever `DATABASE_URL` points to. The `_test` suffix is always added, so the tests can't wipe your development data by mistake. They cover the paths that matter most: signing up and in, refreshing tokens (including a reused one), cart to checkout to order, COD and Razorpay payments with webhooks, cancelling and refunds, verified reviews, and parallel checkouts racing for the last item.
 
 On the storefront, coverage is measured on the logic (config, the API client, stores and hooks). The components have their own behaviour tests using Testing Library.
+
+## 📊 Lighthouse
+
+I ran Lighthouse 13.5 against a production build (`vite build` served by `vite preview`, with the API running locally). I tested four pages in both of Lighthouse's modes. Mobile simulates a mid-range phone on a slow 4G connection, and desktop uses a fast connection.
+
+**Test machine:** Intel i5-14400, 16 GB RAM, Windows 11, headless Microsoft Edge 153.
+
+| Page             | Performance | Accessibility | Best practices |      SEO |
+| ---------------- | ----------: | ------------: | -------------: | -------: |
+| Home, mobile     |     78 → 82 |      93 → 100 |            100 | 92 → 100 |
+| Listing, mobile  |     62 → 79 |      97 → 100 |            100 | 92 → 100 |
+| Product, mobile  |     81 → 82 |           100 |            100 | 92 → 100 |
+| Login, mobile    |     82 → 86 |           100 |            100 | 91 → 100 |
+| Home, desktop    |          97 |      93 → 100 |            100 | 92 → 100 |
+| Listing, desktop |          98 |      93 → 100 |            100 | 92 → 100 |
+| Product, desktop |          99 |      97 → 100 |            100 | 92 → 100 |
+| Login, desktop   |    99 → 100 |           100 |            100 | 92 → 100 |
+
+The first number is before this round of fixes and the second is after. Scores move by a few points between runs.
+
+Lighthouse's two presets test at 412 px and 1350 px wide, which skips the tablet and small-laptop layout. So I also tested the home page at those widths with desktop settings, because the hero changes layout there:
+
+| Home page, width  | Layout shift | Performance |
+| ----------------- | -----------: | ----------: |
+| 820 px (tablet)   |        0.006 |          95 |
+| 1024 px (laptop)  |        0.002 |          99 |
+| 1366 px (desktop) |        0.002 |          97 |
+
+What changed:
+
+- **Accessibility.** The sale red, the grey used for old prices and the green used for stock messages were too light to read comfortably, so I darkened them. The sale badge in dark mode now uses dark text. The animated hero headline had `aria-label` on plain `<span>`s, which isn't allowed. The brand strip was too faint. The product image links had a label that didn't match their visible text. The two handles on the price slider sat on top of each other, which left each one no touch area of its own, so each now covers its own half of the track.
+- **SEO.** There was no `robots.txt`, so the page itself was being served in its place.
+- **Layout shift on the listing page** went from 0.25 to 0. The placeholder for the category title was taller than the real title, and nothing reserved room for the description.
+- **Layout shift on the home page between 768 and 1279 px** went from about 0.3 (measured in a DevTools run) to 0.006. At these widths the hero shows a row of three featured products, which appeared only once their data arrived, so the hero grew taller. The big aurora blobs behind it were positioned as a share of the hero's height, so they jumped too. The blobs are now placed in viewport units, and placeholder cards hold the row's space while it loads.
+- **Faster first paint on phones** (about 3.2 s → 2.3 s). `index.html` now contains a static copy of the header, which paints as soon as the stylesheet arrives. React replaces it once the JavaScript has loaded.
+- **Fewer round trips.** Plain GET requests no longer send the CSRF header, so they don't need a CORS preflight first. The listing and product pages start fetching their data while their code is still downloading, instead of afterwards. The browser also opens the API connection early, and the first row of product images loads at high priority.
+- **Less data.** Product cards no longer download their second, hover-only image until you actually hover over them. On a phone that image is never downloaded at all.
+
+If you run Lighthouse yourself, point it at the production build (see [Trying the production build](#trying-the-production-build)), not at `npm run dev`. The dev server sends unbundled, unminified code, so its performance numbers are far worse than what visitors get.
+
+Mobile performance tops out around 80–86, and the reason is the architecture. The whole storefront renders in the browser, so nothing real can appear until about 216 KB of compressed JavaScript has downloaded and run. On Lighthouse's simulated slow phone that alone takes most of the budget, which is why even the login page, which needs no data, has an LCP of about 3.9 s. Going much further would mean server-side rendering or a lighter UI stack. Desktop scores 97–100.
 
 ## 🔒 Code quality and security
 
@@ -381,6 +456,7 @@ A few things didn't fit the standards or the original plan exactly, so here they
 5. **Storefront coverage** is measured on the logic layer, not every component.
 6. **`db:reset` runs the seeder itself**, since `prisma migrate reset` stopped seeding in Prisma 7.
 7. **GitHub Actions instead of GitLab CI.** The workflow runs the same jobs as the shared GitLab config. I left `common/gitlab/` in place untouched for reference.
+8. **The PWA config is plain JavaScript.** vite-plugin-pwa's bundled type declarations, and the Workbox ones they pull in, don't compile with `skipLibCheck: false` and `exactOptionalPropertyTypes`. The errors are inside `node_modules`, so they can't be fixed from here. The plugin options live in `apps/web/pwa.config.js`, and `vite.config.ts` imports it through a small hand-written `pwa.config.d.ts`. Everything else stays fully type-checked, including the `virtual:pwa-register` types the app uses.
 
 ## 🐛 Troubleshooting
 
@@ -399,6 +475,12 @@ A few things didn't fit the standards or the original plan exactly, so here they
 **Razorpay doesn't show up at checkout.** It only appears when all three `RAZORPAY_*` variables are set.
 
 **A commit is rejected with `gitleaks 8.30.x is required`.** Install Gitleaks and make sure it's on your `PATH`.
+
+**Pages load but products don't, when using the production build.** The browser is probably blocking the API calls because of CORS. Serve the build on port 5173 with `--port 5173`, or add the port you're using to `CORS_ORIGINS` in `apps/api/.env` and restart the API.
+
+**I don't see my latest change after a deploy.** The service worker serves the cached version until you accept the "A new version of Aura is ready" toast, or until every tab of the store is closed. The service worker only runs in production builds, so `npm run dev` is never affected.
+
+**The "Install the app" button doesn't appear.** Browsers only offer installing over HTTPS (or on `localhost`), from a production build, and only if the app isn't installed already. Safari doesn't support the install prompt, so on an iPhone use Share → Add to Home Screen.
 
 ## 🚀 What's next
 

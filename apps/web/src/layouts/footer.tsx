@@ -5,6 +5,7 @@ import { Link } from 'react-router';
 import { toast } from 'sonner';
 
 import { Logo } from '@/components/brand';
+import { InstallAppButton } from '@/features/pwa/pwa-parts';
 
 const PERKS = [
   { icon: Truck, title: 'Free shipping', text: 'On every order over ₹999' },
@@ -103,6 +104,7 @@ export function Footer() {
               <ArrowRight className="size-4" />
             </button>
           </form>
+          <InstallAppButton />
         </div>
         {COLUMNS.map((column) => (
           <div key={column.title}>

@@ -16,29 +16,35 @@ function positiveNumber(value: string | null): number | undefined {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
 }
 
+/** Reads listing filters from a URL. Route loaders use it too, to prefetch the same query. */
+export function parseProductFilters(
+  params: URLSearchParams,
+  slug: string | undefined,
+): ProductFilters {
+  const sort = params.get('sort');
+  return {
+    search: params.get('q') ?? undefined,
+    category: slug ?? params.get('category') ?? undefined,
+    brand: params
+      .getAll('brand')
+      .flatMap((value) => value.split(','))
+      .filter(Boolean),
+    minPrice: positiveNumber(params.get('minPrice')),
+    maxPrice: positiveNumber(params.get('maxPrice')),
+    inStock: params.get('inStock') === 'true',
+    attr: params.getAll('attr'),
+    sort: isSort(sort) ? sort : 'newest',
+    page: Math.max(positiveNumber(params.get('page')) ?? 1, 1),
+    limit: 12,
+  };
+}
+
 /** Product filters stored in the URL so results are shareable and survive a refresh. */
 export function useProductFilters() {
   const [params, setParams] = useSearchParams();
   const { slug } = useParams();
 
-  const filters = useMemo<ProductFilters>(() => {
-    const sort = params.get('sort');
-    return {
-      search: params.get('q') ?? undefined,
-      category: slug ?? params.get('category') ?? undefined,
-      brand: params
-        .getAll('brand')
-        .flatMap((value) => value.split(','))
-        .filter(Boolean),
-      minPrice: positiveNumber(params.get('minPrice')),
-      maxPrice: positiveNumber(params.get('maxPrice')),
-      inStock: params.get('inStock') === 'true',
-      attr: params.getAll('attr'),
-      sort: isSort(sort) ? sort : 'newest',
-      page: Math.max(positiveNumber(params.get('page')) ?? 1, 1),
-      limit: 12,
-    };
-  }, [params, slug]);
+  const filters = useMemo(() => parseProductFilters(params, slug), [params, slug]);
 
   /** Applies changes and resets to the first page unless the page itself changes. */
   const update = useCallback(

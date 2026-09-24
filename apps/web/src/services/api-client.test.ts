@@ -78,13 +78,14 @@ describe('createApiClient', () => {
     });
   });
 
-  it('omits auth and body when there are none', async () => {
+  it('omits auth, body and the CSRF header on a plain GET', async () => {
     const { api, fetchImpl } = client([ok({ id: 'a' })]);
     await api.request('/things', itemSchema);
 
     const headers = headersOf(fetchImpl.mock.calls[0]);
     expect(headers.has('authorization')).toBe(false);
     expect(headers.has('content-type')).toBe(false);
+    expect(headers.has('x-requested-with')).toBe(false);
     expect(fetchImpl.mock.calls[0]?.[1]?.body).toBeNull();
   });
 

@@ -91,7 +91,8 @@ export function ProductsPage() {
           <div>
             {filters.search !== undefined && <p className="eyebrow mb-2">Search results for</p>}
             {title === '' ? (
-              <Skeleton className="h-16 w-72" />
+              // Same height as the heading below, so nothing moves when the name arrives.
+              <Skeleton className="h-[calc(clamp(2.8rem,6vw,5rem)*1.05)] w-72 max-w-full" />
             ) : (
               <motion.h1
                 key={title}
@@ -104,6 +105,12 @@ export function ProductsPage() {
             )}
             {category.data?.description != null && (
               <p className="mt-3 max-w-xl text-muted">{category.data.description}</p>
+            )}
+            {filters.category !== undefined && category.isPending && (
+              <div aria-hidden className="mt-3 flex min-h-12 max-w-xl flex-col gap-2 pt-1">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
             )}
           </div>
           <p className="text-sm text-muted" aria-live="polite">
@@ -225,7 +232,12 @@ export function ProductsPage() {
                 )}
               >
                 {products.data.data.map((product, index) => (
-                  <ProductCard key={product.id} product={product} index={index} />
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    index={index}
+                    priority={index < 4}
+                  />
                 ))}
               </motion.div>
             </AnimatePresence>

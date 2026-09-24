@@ -112,10 +112,13 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
   }
 
   async function call(path: string, options: RequestOptions): Promise<unknown> {
+    const method = options.method ?? 'GET';
     const execute = (token: string | null) => {
+      // Only state-changing calls carry the CSRF header. Leaving it off GETs keeps anonymous
+      // reads "simple" CORS requests, which saves a preflight round trip on every page load.
       const headers: Record<string, string> = {
         accept: 'application/json',
-        'x-requested-with': 'fetch',
+        ...(method === 'GET' ? {} : { 'x-requested-with': 'fetch' }),
         ...options.headers,
       };
       if (options.body !== undefined) {
@@ -126,7 +129,7 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
       }
 
       return fetchImpl(buildUrl(config.baseUrl, path, options.query), {
-        method: options.method ?? 'GET',
+        method,
         headers,
         credentials: 'include',
         body: options.body === undefined ? null : JSON.stringify(options.body),

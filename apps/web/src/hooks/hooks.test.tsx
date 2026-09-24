@@ -25,7 +25,13 @@ import {
   useRegister,
 } from './use-auth';
 import { fromGuestItem, fromServerItem, useCart } from './use-cart';
-import { useCommandShortcut, useDebouncedValue, useDocumentTitle, useScrolled } from './use-utils';
+import {
+  useCommandShortcut,
+  useDebouncedValue,
+  useDocumentTitle,
+  useOnline,
+  useScrolled,
+} from './use-utils';
 import { useWishlist } from './use-wishlist';
 
 const snapshot = {
@@ -102,6 +108,25 @@ describe('utility hooks', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k' }));
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'j', ctrlKey: true }));
     expect(handler).toHaveBeenCalledTimes(2);
+    unmount();
+  });
+
+  it('follows the browser going offline and back online', () => {
+    const onLine = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(true);
+    const { result, unmount } = renderHook(() => useOnline());
+    expect(result.current).toBe(true);
+
+    act(() => {
+      onLine.mockReturnValue(false);
+      window.dispatchEvent(new Event('offline'));
+    });
+    expect(result.current).toBe(false);
+
+    act(() => {
+      onLine.mockReturnValue(true);
+      window.dispatchEvent(new Event('online'));
+    });
+    expect(result.current).toBe(true);
     unmount();
   });
 });

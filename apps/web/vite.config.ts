@@ -4,8 +4,10 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
+import { pwa } from './pwa.config.js';
+
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), pwa()],
   resolve: {
     // One React instance for the app and every library that renders with it.
     dedupe: ['react', 'react-dom'],

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 
 /** Returns `value` once it has stopped changing for `delay` milliseconds. */
 export function useDebouncedValue<T>(value: T, delay = 250): T {
@@ -55,4 +55,18 @@ export function useCommandShortcut(handler: () => void): void {
       window.removeEventListener('keydown', onKeyDown);
     };
   }, [handler]);
+}
+
+function subscribeToConnection(onChange: () => void): () => void {
+  window.addEventListener('online', onChange);
+  window.addEventListener('offline', onChange);
+  return () => {
+    window.removeEventListener('online', onChange);
+    window.removeEventListener('offline', onChange);
+  };
+}
+
+/** Whether the browser currently has a network connection. */
+export function useOnline(): boolean {
+  return useSyncExternalStore(subscribeToConnection, () => navigator.onLine);
 }

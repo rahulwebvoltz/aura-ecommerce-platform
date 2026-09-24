@@ -87,7 +87,10 @@ describe('product card', () => {
     const client = createTestQueryClient();
     render(<ProductCard product={product} />, { wrapper: wrapperFor(client) });
 
-    for (const link of screen.getAllByRole('link', { name: 'Phone' })) {
+    // The image link is named from its content, so its accessible name includes the badges.
+    const links = screen.getAllByRole('link', { name: /^Phone/ });
+    expect(links).toHaveLength(2);
+    for (const link of links) {
       expect(link).toHaveAttribute('href', '/products/phone');
     }
     expect(screen.getByText('−16%')).toBeInTheDocument();
@@ -95,5 +98,23 @@ describe('product card', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Add Phone to bag' }));
     expect(await screen.findByText('Quick add')).toBeInTheDocument();
+  });
+
+  it('downloads the hover image only after the card is first hovered', async () => {
+    const client = createTestQueryClient();
+    const { container } = render(
+      <ProductCard
+        product={{
+          ...product,
+          hoverImage: { id: 'i2', url: 'https://img.test/2.webp', alt: null, sortOrder: 1 },
+        }}
+      />,
+      { wrapper: wrapperFor(client) },
+    );
+    const hoverImage = () => container.querySelector('img[src="https://img.test/2.webp"]');
+
+    expect(hoverImage()).toBeNull();
+    await userEvent.hover(screen.getByRole('article'));
+    expect(hoverImage()).not.toBeNull();
   });
 });

@@ -5,7 +5,7 @@ import { useRef } from 'react';
 import { Link, useNavigate } from 'react-router';
 
 import { Button, Magnetic } from '@/components/ui/button';
-import { CountUp, Rating, SplitText } from '@/components/ui/display';
+import { CountUp, Rating, Skeleton, SplitText } from '@/components/ui/display';
 import { formatMoney } from '@ecommerce/shared';
 
 function FloatingProduct({
@@ -72,14 +72,16 @@ export function Hero({ featured }: { featured: ProductSummaryDto[] }) {
 
   return (
     <section ref={ref} className="grain relative isolate overflow-hidden">
+      {/* The blobs are placed from the top in viewport units, not as a share of the hero's height,
+          so they stay put when content below them loads and the hero grows. */}
       <div aria-hidden className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="animate-aurora absolute -top-1/3 -left-1/4 size-[70vmax] rounded-full bg-[radial-gradient(circle,oklch(75%_0.14_285/0.55),transparent_60%)] blur-3xl" />
+        <div className="animate-aurora absolute -top-[25vmax] -left-1/4 size-[70vmax] rounded-full bg-[radial-gradient(circle,oklch(75%_0.14_285/0.55),transparent_60%)] blur-3xl" />
         <div
-          className="animate-aurora absolute -right-1/4 -bottom-1/2 size-[65vmax] rounded-full bg-[radial-gradient(circle,oklch(80%_0.12_330/0.45),transparent_60%)] blur-3xl"
+          className="animate-aurora absolute top-[30vmax] -right-1/4 size-[65vmax] rounded-full bg-[radial-gradient(circle,oklch(80%_0.12_330/0.45),transparent_60%)] blur-3xl"
           style={{ animationDelay: '-6s' }}
         />
         <div
-          className="animate-aurora absolute top-1/4 left-1/3 size-[40vmax] rounded-full bg-[radial-gradient(circle,oklch(85%_0.12_200/0.35),transparent_60%)] blur-3xl"
+          className="animate-aurora absolute top-[18vmax] left-1/3 size-[40vmax] rounded-full bg-[radial-gradient(circle,oklch(85%_0.12_200/0.35),transparent_60%)] blur-3xl"
           style={{ animationDelay: '-12s' }}
         />
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_60%,var(--bg))]" />
@@ -178,6 +180,19 @@ export function Hero({ featured }: { featured: ProductSummaryDto[] }) {
 
           {/* Tablets and small laptops: the collage becomes a compact strip of featured products. */}
           <div className="mt-12 hidden grid-cols-3 gap-4 md:grid xl:hidden">
+            {/* Placeholders with the same box size hold the space while the products load. */}
+            {featured.length === 0 &&
+              Array.from({ length: 3 }, (_, index) => (
+                <div
+                  key={index}
+                  aria-hidden
+                  className="rounded-3xl border border-white/60 bg-white/70 p-2.5 dark:border-white/10 dark:bg-white/5"
+                >
+                  <Skeleton className="aspect-square rounded-2xl" />
+                  <p className="invisible mt-2 px-1 text-sm">&nbsp;</p>
+                  <p className="invisible px-1 pb-1 text-sm">&nbsp;</p>
+                </div>
+              ))}
             {featured.map((product, index) => (
               <motion.div
                 key={product.id}
